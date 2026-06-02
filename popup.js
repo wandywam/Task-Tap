@@ -7,24 +7,41 @@ const statusMessage = document.getElementById("statusMessage");
 
 let currentMode = "task";
 
-// When Task Button toggle clicked
-taskBtn.addEventListener("click", () => {
+function switchToTask() {
     currentMode = "task";
     taskBtn.classList.add("active");
     eventBtn.classList.remove("active");
     eventFields.classList.add("hidden");
     createBtn.textContent = "Create Task";
     statusMessage.textContent = "";
-});
 
-// When Event Button toggle clicked
-eventBtn.addEventListener("click", () => {
+    chrome.local.storage.set({mode: "task"});
+}
+
+function switchToEvent() {
     currentMode = "event";
     eventBtn.classList.add("active");
     taskBtn.classList.remove("active");
     eventFields.classList.remove("hidden")
     createBtn.textContent = "Create Event";
     statusMessage.textContent = "";
+
+    chrome.local.storage.set({mode: "event"});
+}
+
+// When Task Button toggle clicked
+taskBtn.addEventListener("click", switchToTask);
+
+// When Event Button toggle clicked
+eventBtn.addEventListener("click", switchToEvent);
+
+// Handle toggle mode
+chrome.storage.local.get(["mode"], (result) => {
+    if (result.mode === "event") {
+        switchToEvent();
+    } else {
+        switchToTask();
+    }
 });
 
 // When either Task or Event is SUBMITTED
