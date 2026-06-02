@@ -1,0 +1,62 @@
+body {
+  width: 320px;
+  font-family: Arial, sans-serif;
+  padding: 16px;
+}
+
+h1 {
+  margin-top: 0;
+  font-size: 22px;
+}
+
+.toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.toggle button {
+  flex: 1;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.toggle button.active {
+  font-weight: bold;
+}
+
+label {
+  display: block;
+  margin-top: 10px;
+  margin-bottom: 4px;
+}
+
+input,
+textarea,
+button {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+input,
+textarea {
+  padding: 8px;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.hidden {
+  display: none;
+}
+
+#createBtn {
+  margin-top: 14px;
+  padding: 10px;
+  cursor: pointer;
+}
+
+#statusMessage {
+  margin-top: 12px;
+}

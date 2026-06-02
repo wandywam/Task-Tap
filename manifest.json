@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "Task Tap",
+  "version": "1.0.0",
+  "description": "Quickly create Google Tasks and Calendar events from a popup.",
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "permissions": []
+}

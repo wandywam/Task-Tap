@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Task Tap</title>
+        <link rel="stylesheet" href="popup.css">
+    </head>
+
+    <body>
+
+        <h1>Task Tap</h1>
+
+        <!-- Task vs. Event toggle button -->
+        <div class="toggle">
+            <button id="taskBtn" class="active">Task</button>
+            <button id="eventBtn">Event</button>
+        </div>
+
+        <!-- Enter info about task/event -->
+        <form id="entryForm">
+            <label>Title</label>
+            <input id="titleInput" type="text" placeholder="Finish homework">
+
+            <label>Date</label>
+            <input id="dateInput" type="date">
+
+            <label>Time</label>
+            <input id="timeInput" type="time">
+
+            <!-- Default == Event tabs are hidden (Task is default mode) -->
+            <div id="eventFields" class="hidden">
+                <label>Duration</label>
+                <input id="durationInput" type="number" value="60">
+
+                <label>Location</label>
+                <input id="locationInput" type="text" placeholder="Optional">
+            </div>
+
+            <label>Notes</label>
+            <textarea id="notesInput" placeholder="Optional"></textarea>
+
+            <button type="submit" id="createBtn">Create Task</button>
+        </form>
+
+        <p id="statusMessage"></p>
+
+        <script src="popup.js"></script>
+
+    </body>
+</html>
