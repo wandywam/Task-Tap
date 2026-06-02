@@ -9,16 +9,21 @@
 
         <h1>Task Tap</h1>
 
+        <div id="authSection">
+            <button id="signInBtn">Sign in with Google</button>
+            <p id="authStatus">Not signed in</p>
+        </div>
+
         <!-- Task vs. Event toggle button -->
         <div class="toggle">
-            <button id="taskBtn" class="active">Task</button>
-            <button id="eventBtn">Event</button>
+            <button id="taskBtn" class="active" style="background-color:rgb(88, 147, 203); color: white;">Task</button>
+            <button id="eventBtn" style="background-color:rgb(0, 179, 255); color: white;">Event</button>
         </div>
 
         <!-- Enter info about task/event -->
         <form id="entryForm">
             <label>Title</label>
-            <input id="titleInput" type="text" placeholder="Finish homework">
+            <input id="titleInput" type="text" placeholder="Enter title">
 
             <label>Date</label>
             <input id="dateInput" type="date">
@@ -26,7 +31,7 @@
             <label>Time</label>
             <input id="timeInput" type="time">
 
-            <!-- Default == Event tabs are hidden (Task is default mode) -->
+            <!-- Default == Event tabs are "hidden" (Task is default mode) -->
             <div id="eventFields" class="hidden">
                 <label>Duration</label>
                 <input id="durationInput" type="number" value="60">
@@ -38,7 +43,7 @@
             <label>Notes</label>
             <textarea id="notesInput" placeholder="Optional"></textarea>
 
-            <button type="submit" id="createBtn">Create Task</button>
+            <button type="submit" id="createBtn" style="background-color: rgb(111, 191, 111); color: white;">Create Task</button> <!-- "Task" changes to "Event" from popup.js -->
         </form>
 
         <p id="statusMessage"></p>

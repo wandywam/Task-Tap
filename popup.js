@@ -5,6 +5,19 @@ const createBtn = document.getElementById("createBtn");
 const entryForm = document.getElementById("entryForm");
 const statusMessage = document.getElementById("statusMessage");
 
+const signInBtn = document.getElementById("signInBtn");
+const authStatus = document.getElementById("authStatus");
+
+// Autofill today's date
+const today = new Date().toISOString().split("T")[0];
+document.getElementById("dateInput").value = today
+
+// Autofill time
+const now = new Date();
+now.setMinutes(now.getMinutes());
+const defaultTime = now.toTimeString().slice(0, 5);
+document.getElementById("timeInput").value = defaultTime;
+
 let currentMode = "task";
 
 function switchToTask() {
@@ -29,6 +42,10 @@ function switchToEvent() {
     chrome.local.storage.set({mode: "event"});
 }
 
+signInBtn.addEventListener("click", () => {
+    authStatus.textContent = "Sign in coming soon...";
+})
+
 // When Task Button toggle clicked
 taskBtn.addEventListener("click", switchToTask);
 
@@ -48,14 +65,20 @@ chrome.storage.local.get(["mode"], (result) => {
 entryForm.addEventListener("submit", (event) => {
     event.preventDefault();
 
+    const title = document.getElementById("titleInput").value.trim();
+    if (!title) {
+        statusMessage.textContent = "Please enter a valid title.";
+        return;
+    }
+
+    // Create Task/Event object
     const data = {
         type: currentMode,
-        title: document.getElementById("titleInput").value,
+        title: title,
         date: document.getElementById("dateInput").value,
         time: document.getElementById("timeInput").value,
         notes: document.getElementById("notesInput").value,
     };
-
     if (currentMode === "event") {
         data.duration = document.getElementById("durationInput").value;
         data.location = document.getElementById("locationInput").value;
@@ -63,4 +86,11 @@ entryForm.addEventListener("submit", (event) => {
 
     console.log(data);
     statusMessage.textContent = `${currentMode === "task" ? "Task" : "Event"} data logged.`;
+
+    document.getElementById("titleInput").value = "";
+    document.getElementById("notesInput").value = "";
+
+    if (currentMode === "event") {
+        document.getElementById("locationInput").value = "";
+    }
 });
