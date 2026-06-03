@@ -6,5 +6,12 @@
   "action": {
     "default_popup": "popup.html"
   },
-  "permissions": ["storage"]
+  "permissions": ["storage", "identity"],
+  "oauth2": {
+    "client_id": "837611272083-r0pearev5cdtmghdghkqnrchg80tghis.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/tasks",
+      "https://www.googleapis.com/auth/calendar"
+    ]
+  }
 }
