@@ -22,6 +22,7 @@ document.getElementById("timeInput").value = defaultTime;
 // Config vars
 let currentMode = "task";
 let isSignedIn = false;
+let defaultTaskListId = null;
 
 function switchToTask() {
     currentMode = "task";
@@ -43,6 +44,91 @@ function switchToEvent() {
     statusMessage.textContent = "";
 
     chrome.storage.local.set({mode: "event"});
+}
+
+function getTaskLists(token) {
+    // api endpoint
+    fetch("https://tasks.googleapis.com/tasks/v1/users/@me/lists", {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const taskListId = data.items[0].id;
+        defaultTaskListId = taskListId;
+        console.log("Task List ID:", taskListId);
+    })
+    .catch(error => {
+        console.log("Error getting task lists:", error);
+    })
+}
+
+function createTask(token, taskListId, taskData) {
+    fetch(
+        `https://tasks.googleapis.com/tasks/v1/lists/${taskListId}/tasks`,
+        {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ // convert js to json
+                title: taskData.title,
+                notes: taskData.notes,
+                due: `${taskData.date}T00:00:00.000Z`
+            })
+        }
+    )
+    .then(response => response.json())
+    .then(data => {
+        console.log("Created task:", data);
+        statusMessage.textContent = "Task created."
+    })
+    .catch(error => {
+        console.log("Error creating task:", error);
+        statusMessage.textContent = "Failed to create task."
+    });
+}
+
+function createEvent(token, eventData) {
+    fetch("https://www.googleapis.com/calendar/v3/calendars/primary/events", {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            summary: eventData.title,
+            location: eventData.location,
+            description: eventData.notes,
+        start: {
+            dateTime: `${eventData.date}T${eventData.time}:00`,
+            timeZone: "America/Los_Angeles"
+        },
+        end: {
+            dateTime: getEndDateTime(eventData.date, eventData.time, eventData.duration),
+            timeZone: "America/Los_Angeles"
+        }
+})
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Created event:", data);
+        statusMessage.textContent = "Event created."
+    })
+    .catch(error => {
+        console.log("Error creating event:", error);
+        statusMessage.textContent = "Failed to create event."
+    });
+}
+
+// helper func
+function getEndDateTime(date, time, duration) {
+    const start = new Date(`${date}T${time}:00`);
+    start.setMinutes(start.getMinutes() + Number(duration));
+
+    return start.toISOString();
 }
 
 // Check if token stored and user signed in --> keep user signed in
@@ -74,6 +160,8 @@ signInBtn.addEventListener("click", () => {
     signOutBtn.classList.remove("hidden");
 
     console.log("Access token: ", token);
+
+    getTaskLists(token);
 
     // store token = user signed in
     chrome.storage.local.set({
@@ -134,9 +222,24 @@ entryForm.addEventListener("submit", (event) => {
         time: document.getElementById("timeInput").value,
         notes: document.getElementById("notesInput").value,
     };
+
     if (currentMode === "event") {
         data.duration = document.getElementById("durationInput").value;
         data.location = document.getElementById("locationInput").value;
+    }
+
+    if (currentMode === "task") {
+        chrome.storage.local.get(["accessToken"], (result) => {
+            createTask(result.accessToken, defaultTaskListId, data);
+        });
+        statusMessage.textContent = "Task created.";
+    }
+    else if (currentMode === "event") {
+        chrome.storage.local.get(["accessToken"], (result) => {
+            createEvent(result.accessToken, data);
+        });
+
+        statusMessage.textContent = "Event created.";
     }
 
     console.log(data);
