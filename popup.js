@@ -8,6 +8,7 @@ const statusMessage = document.getElementById("statusMessage");
 const signInBtn = document.getElementById("signInBtn");
 const signOutBtn = document.getElementById("signOutBtn");
 const authStatus = document.getElementById("authStatus");
+const taskListStatus = document.getElementById("taskListStatus");
 
 // Autofill today's date
 const today = new Date().toISOString().split("T")[0];
@@ -55,9 +56,10 @@ function getTaskLists(token) {
     })
     .then(response => response.json())
     .then(data => {
-        const taskListId = data.items[0].id;
-        defaultTaskListId = taskListId;
-        console.log("Task List ID:", taskListId);
+        const defaultTaskList = data.items[0]; //storing object containing id and title
+        defaultTaskListId = defaultTaskList.id;
+        taskListStatus.textContent = `Task List: ${defaultTaskList.title}`;
+        console.log("Task List ID:", defaultTaskListId);
     })
     .catch(error => {
         console.log("Error getting task lists:", error);
@@ -75,19 +77,26 @@ function createTask(token, taskListId, taskData) {
             },
             body: JSON.stringify({ // convert js to json
                 title: taskData.title,
-                notes: taskData.notes,
-                due: `${taskData.date}T00:00:00.000Z`
+                notes: taskData.time ? `${taskData.notes}\nDue time: ${taskData.time}` : taskData.notes,
+                due: `${taskData.date}T${taskData.time || "00:00"}:00.000Z`
+                
             })
         }
     )
     .then(response => response.json())
     .then(data => {
         console.log("Created task:", data);
-        statusMessage.textContent = "Task created."
+        statusMessage.textContent = "Task created!"
+
+        createBtn.disabled = false;
+        createBtn.textContent = "Create Task";
     })
     .catch(error => {
         console.log("Error creating task:", error);
         statusMessage.textContent = "Failed to create task."
+
+        createBtn.disabled = false;
+        createBtn.textContent = "Create Task";
     });
 }
 
@@ -98,7 +107,7 @@ function createEvent(token, eventData) {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({
+        body: JSON.stringify({ //json to string form
             summary: eventData.title,
             location: eventData.location,
             description: eventData.notes,
@@ -115,11 +124,17 @@ function createEvent(token, eventData) {
     .then(response => response.json())
     .then(data => {
         console.log("Created event:", data);
-        statusMessage.textContent = "Event created."
+        statusMessage.textContent = "Event created!"
+
+        createBtn.disabled = false;
+        createBtn.textContent = "Create Event";
     })
     .catch(error => {
         console.log("Error creating event:", error);
         statusMessage.textContent = "Failed to create event."
+
+        createBtn.disabled = false;
+        createBtn.textContent = "Create Event";
     });
 }
 
@@ -141,6 +156,8 @@ chrome.storage.local.get(
             authStatus.textContent = "Signed in";
             signInBtn.classList.add("hidden");
             signOutBtn.classList.remove("hidden");
+
+            getTaskLists(result.accessToken);
         }
     }
 );
@@ -158,8 +175,6 @@ signInBtn.addEventListener("click", () => {
     authStatus.textContent = "Signed in";
     signInBtn.classList.add("hidden");
     signOutBtn.classList.remove("hidden");
-
-    console.log("Access token: ", token);
 
     getTaskLists(token);
 
@@ -179,10 +194,13 @@ signOutBtn.addEventListener("click", () => {
         "signedIn"
     ]);
 
+    //cleanup
     authStatus.textContent = "Not signed in";
     signInBtn.classList.remove("hidden");
     signOutBtn.classList.add("hidden");
-})
+    taskListStatus.textContent = "";
+    defaultTaskListId = null;
+});
 
 // When Task Button toggle clicked
 taskBtn.addEventListener("click", switchToTask);
@@ -228,22 +246,33 @@ entryForm.addEventListener("submit", (event) => {
         data.location = document.getElementById("locationInput").value;
     }
 
+    createBtn.disabled = true;
+    createBtn.textContent = "Creating...";
+
     if (currentMode === "task") {
         chrome.storage.local.get(["accessToken"], (result) => {
+            statusMessage.textContent = "Creating...";
             createTask(result.accessToken, defaultTaskListId, data);
         });
-        statusMessage.textContent = "Task created.";
     }
     else if (currentMode === "event") {
+        if (!data.date) {
+            statusMessage.textContent = "Please choose a date";
+            return;
+        }
+        
+        if (!data.time) {
+            statusMessage.textContent = "Please choose a time";
+            return;
+        }
+
         chrome.storage.local.get(["accessToken"], (result) => {
+            statusMessage.textContent = "Creating...";
             createEvent(result.accessToken, data);
         });
-
-        statusMessage.textContent = "Event created.";
     }
 
     console.log(data);
-    statusMessage.textContent = `${currentMode === "task" ? "Task" : "Event"} data logged.`;
 
     // clear input boxes
     document.getElementById("titleInput").value = "";
