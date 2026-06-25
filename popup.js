@@ -88,6 +88,9 @@ function createTask(token, taskListId, taskData) {
         console.log("Created task:", data);
         statusMessage.textContent = "Task created!"
 
+        document.getElementById("titleInput").value = "";
+        document.getElementById("notesInput").value = "";
+
         createBtn.disabled = false;
         createBtn.textContent = "Create Task";
     })
@@ -125,6 +128,10 @@ function createEvent(token, eventData) {
     .then(data => {
         console.log("Created event:", data);
         statusMessage.textContent = "Event created!"
+
+        document.getElementById("titleInput").value = "";
+        document.getElementById("notesInput").value = "";
+        document.getElementById("locationInput").value = "";
 
         createBtn.disabled = false;
         createBtn.textContent = "Create Event";
@@ -166,8 +173,8 @@ chrome.storage.local.get(
 signInBtn.addEventListener("click", () => {
     chrome.identity.getAuthToken({ interactive: true}, (token) => {
         if (chrome.runtime.lastError || !token) {
-            authStatus.textContent = "Sign in failed";
-            console.log(chrome.runtime.lastError);
+            authStatus.textContent = "Sign in failed. Please try again.";
+            console.log("Auth error:", chrome.runtime.lastError);
             return;
         }
     
@@ -246,28 +253,29 @@ entryForm.addEventListener("submit", (event) => {
         data.location = document.getElementById("locationInput").value;
     }
 
-    createBtn.disabled = true;
-    createBtn.textContent = "Creating...";
-
-    if (currentMode === "task") {
-        chrome.storage.local.get(["accessToken"], (result) => {
-            statusMessage.textContent = "Creating...";
-            createTask(result.accessToken, defaultTaskListId, data);
-        });
-    }
-    else if (currentMode === "event") {
+    if (currentMode === "event") {
         if (!data.date) {
             statusMessage.textContent = "Please choose a date";
             return;
         }
-        
+
         if (!data.time) {
             statusMessage.textContent = "Please choose a time";
             return;
         }
+    }
 
+    createBtn.disabled = true;
+    createBtn.textContent = "Creating...";
+    statusMessage.textContent = "Creating...";
+
+    if (currentMode === "task") {
         chrome.storage.local.get(["accessToken"], (result) => {
-            statusMessage.textContent = "Creating...";
+            createTask(result.accessToken, defaultTaskListId, data);
+        });
+    }
+    else if (currentMode === "event") {
+        chrome.storage.local.get(["accessToken"], (result) => {
             createEvent(result.accessToken, data);
         });
     }
@@ -275,10 +283,7 @@ entryForm.addEventListener("submit", (event) => {
     console.log(data);
 
     // clear input boxes
-    document.getElementById("titleInput").value = "";
-    document.getElementById("notesInput").value = "";
+    // document.getElementById("titleInput").value = "";
+    // document.getElementById("notesInput").value = "";
 
-    if (currentMode === "event") {
-        document.getElementById("locationInput").value = "";
-    }
 });
