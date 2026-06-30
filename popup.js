@@ -124,10 +124,18 @@ function createEvent(token, eventData) {
         }
 })
     })
-    .then(response => response.json())
+    .then(async (response) => {
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(JSON.stringify(data));
+        }
+        
+        return data;
+    })
     .then(data => {
         console.log("Created event:", data);
-        statusMessage.textContent = "Event created!"
+        statusMessage.innerHTML = `Event created! <a href="${data.htmlLink}" target="_blank">See Event</a>`;
 
         document.getElementById("titleInput").value = "";
         document.getElementById("notesInput").value = "";
@@ -275,6 +283,13 @@ entryForm.addEventListener("submit", (event) => {
         });
     }
     else if (currentMode === "event") {
+        if (!data.duration || Number(data.duration) <= 0) {
+            statusMessage.textContent = "Please enter a valid duration.";
+            createBtn.disabled = false;
+            createBtn.textContent = "Create Event";
+            return;
+        }
+
         chrome.storage.local.get(["accessToken"], (result) => {
             createEvent(result.accessToken, data);
         });

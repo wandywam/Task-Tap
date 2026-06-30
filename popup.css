@@ -2,11 +2,14 @@ body {
   width: 320px;
   font-family: Arial, sans-serif;
   padding: 16px;
+  max-height: 580px;
+  overflow-y: auto;
 }
 
 h1 {
   margin-top: 0;
-  font-size: 22px;
+  margin-bottom: 12px;
+  font-size: 24px;
 }
 
 .toggle {
@@ -27,7 +30,7 @@ h1 {
 
 label {
   display: block;
-  margin-top: 10px;
+  margin-top: 8px;
   margin-bottom: 4px;
 }
 
@@ -40,11 +43,12 @@ button {
 
 input,
 textarea {
-  padding: 8px;
+  padding: 6px;
 }
 
 textarea {
   resize: vertical;
+  height: 50px;
 }
 
 .hidden {
@@ -52,9 +56,11 @@ textarea {
 }
 
 #createBtn {
-  margin-top: 14px;
+  position: sticky;
+  margin-top: 10px;
   padding: 10px;
   cursor: pointer;
+  bottom: 0;
 }
 
 #statusMessage {
